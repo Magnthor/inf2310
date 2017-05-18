@@ -8,4 +8,4 @@ komprimering = 8;
 %% Oppgave 2
 
 
-[trans_bilde, steg3] = komprimere('uio.png', komprimering);
+[steg5, steg4, steg3] = komprimere('uio.png', komprimering);
