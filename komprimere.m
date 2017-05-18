@@ -1,4 +1,4 @@
-function [steg4_bilde] = komprimere(bilde_path, q)
+function [steg4_bilde, steg3_bilde] = komprimere(bilde_path, q)
 %% Steg 1
 bilde = double(imread(bilde_path));
 info = imfinfo(bilde_path);
@@ -10,42 +10,33 @@ steg4_bilde = zeros(info.Height, info.Width);
 bilde = bilde - 128;
 
 %% Steg 3
-for a = 1 : info.Height
-    for b = 1 : info.Width
-        kvadrant_x = floor((a-1) / 8) + 1;
-        kvadrant_y = floor((b-1) / 8) + 1;
-        
-        for x = 1 : 8
-            for y = 1 : 8
-                del_1 = cos((((2 * x) + 1) * a * pi) / 16);
-                del_2 = cos((((2 * y) + 1) * b * pi) / 16);
-                steg3_bilde(a,b) = steg3_bilde(a,b) + (bilde((kvadrant_x + x),(kvadrant_y + y)) * del_1 * del_2);
+for a = 1 : 8 : info.Height
+    for b = 1 : 8 : info.Width
 
-            end
-        end
-        
-        steg3_bilde(a,b) = steg3_bilde(a,b) * (1 / 4) * c(a) * c(b);
+        steg3_bilde(a:a+7, b:b+7) = dct_8_block(bilde(a:a+7, b:b+7), a, b);
+
         
     end
 end
 %% Steg 4
 for a = 1 : info.Height
     for b = 1 : info.Width
-        kvadrant_x = floor((a-1) / 8) + 1;
-        kvadrant_y = floor((b-1) / 8) + 1;
+        kvadrant_x = floor((a-1) / 8);
+        kvadrant_y = floor((b-1) / 8);
         
         for x = 1 : 8
             for y = 1 : 8
                 del_1 = cos((((2 * a) + 1) * x * pi) / 16);
                 del_2 = cos((((2 * b) + 1) * y * pi) / 16);
-                steg4_bilde(a,b) = steg4_bilde(a,b) + (c(x) * c(y) * steg3_bilde((kvadrant_x + x),(kvadrant_y + y)) * del_1 * del_2);
+                steg4_bilde(a,b) = steg4_bilde(a,b) + (c(x) * c(y) * steg3_bilde(((kvadrant_x *8) + x),((kvadrant_y*8) + y)) * del_1 * del_2);
             end
         end
         
-        steg4_bilde(a,b) = round((steg4_bilde(a,b) * (1 / 4)) + 128);
+        steg4_bilde(a,b) = round((steg4_bilde(a,b) * (1 / 4)));
         
     end
 end
+steg4_bilde = steg4_bilde + 128;
 
 
 %% Steg 5
